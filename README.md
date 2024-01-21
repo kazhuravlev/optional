@@ -1,10 +1,10 @@
 # Optional values for Go projects
 
-We are often need some tools that help us to work with optional values. For example for optional fields in
-requests/responses from API (json), optional values in YAML/JSON configs or optional (nullable) columns in some tables.
-Usually we use a pointer for some data types but this is works not well for some scenario.
+We often need tools that help us work with optional values. For example, for optional fields in requests/responses from
+APIs (JSON), optional values in YAML/JSON configs, or nullable columns in some tables. Typically, we use a pointer for
+certain data types, but this does not work well for some scenarios.
 
-This package provides a simple way to define those optional fields and some helpers for marshalling and unmarshalling
+This package offers a simple way to define optional fields and provides some helpers for marshalling and unmarshalling
 data.
 
 ## Features
