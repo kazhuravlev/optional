@@ -2,6 +2,7 @@ package optional
 
 import (
 	"fmt"
+
 	"gopkg.in/yaml.v3"
 )
 
