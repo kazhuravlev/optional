@@ -1,5 +1,11 @@
 # Optional values for Go projects
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/kazhuravlev/optional.svg)](https://pkg.go.dev/github.com/kazhuravlev/optional)
+[![License](https://img.shields.io/github/license/kazhuravlev/optional?color=blue)](https://github.com/kazhuravlev/optional/blob/master/LICENSE)
+[![Build Status](https://github.com/kazhuravlev/optional/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/kazhuravlev/optional/actions/workflows/tests.yml?query=branch%3Amaster)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kazhuravlev/optional)](https://goreportcard.com/report/github.com/kazhuravlev/optional)
+[![codecov](https://codecov.io/gh/kazhuravlev/optional/graph/badge.svg?token=B7ILMGURZW)](https://codecov.io/gh/kazhuravlev/optional)
+
 We often need tools that help us work with optional values. For example, for optional fields in requests/responses from
 APIs (JSON), optional values in YAML/JSON configs, or nullable columns in some tables. Typically, we use a pointer for
 certain data types, but this does not work well for some scenarios.
