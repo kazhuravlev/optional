@@ -149,3 +149,16 @@ func TestSet(t *testing.T) {
 	var val Val[int]
 	fOk(val)
 }
+
+func TestReset(t *testing.T) {
+	t.Parallel()
+
+	val := New(42)
+
+	require.Equal(t, true, val.HasVal())
+	require.Equal(t, 42, val.Val())
+
+	val.Reset()
+	require.Equal(t, false, val.HasVal())
+	require.Equal(t, 0, val.Val())
+}

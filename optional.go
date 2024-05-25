@@ -67,3 +67,9 @@ func (v *Val[T]) Set(val T) {
 	v.hasVal = true
 	v.value = val
 }
+
+// Reset will clear value and mark this as empty.
+func (v *Val[T]) Reset() {
+	v.hasVal = false
+	v.value = *new(T)
+}
