@@ -33,9 +33,9 @@ package main
 
 import (
 	"fmt"
+	"encoding/json"
 	"github.com/kazhuravlev/optional"
 )
-import "encoding/json"
 
 type User struct {
 	AvatarURL optional.Val[string] `json:"avatar_url"`
