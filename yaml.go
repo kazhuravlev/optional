@@ -6,34 +6,27 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// UnmarshalYAML implements the interface for unmarshalling yaml.
-func (v *Val[T]) UnmarshalYAML(bb []byte) error {
-	if len(bb) == 0 {
+// UnmarshalYAML implements the yaml.Unmarshaler interface.
+func (v *Val[T]) UnmarshalYAML(node *yaml.Node) error {
+	if node.Kind == yaml.ScalarNode && node.Value == "null" {
 		v.hasVal = false
 		v.value = *new(T)
-
 		return nil
 	}
 
-	if err := yaml.Unmarshal(bb, &v.value); err != nil {
+	if err := node.Decode(&v.value); err != nil {
 		return fmt.Errorf("unmarshal yaml value: %w", err)
 	}
 
 	v.hasVal = true
-
 	return nil
 }
 
-// MarshalYAML implements the interface for marshaling yaml.
-func (v Val[T]) MarshalYAML() ([]byte, error) {
+// MarshalYAML implements the yaml.Marshaler interface.
+func (v Val[T]) MarshalYAML() (interface{}, error) {
 	if !v.hasVal {
-		return []byte("null"), nil
+		return nil, nil
 	}
 
-	res, err := yaml.Marshal(v.Val)
-	if err != nil {
-		return nil, fmt.Errorf("marshal yaml value: %w", err)
-	}
-
-	return res, nil
+	return v.value, nil
 }
