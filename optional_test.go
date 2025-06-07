@@ -264,3 +264,67 @@ func TestValDefault(t *testing.T) {
 	})
 }
 
+func TestAsPointer(t *testing.T) {
+	t.Parallel()
+
+	t.Run("with_value", func(t *testing.T) {
+		t.Parallel()
+
+		val := New("hello")
+		ptr := val.AsPointer()
+		require.NotNil(t, ptr)
+		require.Equal(t, "hello", *ptr)
+	})
+
+	t.Run("without_value", func(t *testing.T) {
+		t.Parallel()
+
+		val := Empty[string]()
+		ptr := val.AsPointer()
+		require.Nil(t, ptr)
+	})
+
+	t.Run("zero_value_with_flag", func(t *testing.T) {
+		t.Parallel()
+
+		val := New(0)
+		ptr := val.AsPointer()
+		require.NotNil(t, ptr)
+		require.Equal(t, 0, *ptr)
+	})
+
+	t.Run("empty_string_with_flag", func(t *testing.T) {
+		t.Parallel()
+
+		val := New("")
+		ptr := val.AsPointer()
+		require.NotNil(t, ptr)
+		require.Equal(t, "", *ptr)
+	})
+
+	t.Run("nil_slice_with_flag", func(t *testing.T) {
+		t.Parallel()
+
+		val := New([]string(nil))
+		ptr := val.AsPointer()
+		require.NotNil(t, ptr)
+		require.Nil(t, *ptr)
+	})
+
+	t.Run("pointer_safety", func(t *testing.T) {
+		t.Parallel()
+
+		val := New("hello")
+		ptr := val.AsPointer()
+		*ptr = "modified"
+
+		// Since Val is passed by value, modifying through pointer affects
+		// the copy used by AsPointer(), not the original
+		result, ok := val.Get()
+		require.True(t, ok)
+		require.Equal(t, "hello", result) // Original unchanged
+
+		// The pointer itself reflects the modification
+		require.Equal(t, "modified", *ptr)
+	})
+}
