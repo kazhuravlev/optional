@@ -212,3 +212,55 @@ func TestGet(t *testing.T) {
 	})
 }
 
+func TestValDefault(t *testing.T) {
+	t.Parallel()
+
+	t.Run("with_value_string", func(t *testing.T) {
+		t.Parallel()
+
+		val := New("hello")
+		require.Equal(t, "hello", val.ValDefault("default"))
+		val.Reset()
+		require.Equal(t, "default", val.ValDefault("default"))
+	})
+
+	t.Run("zero_value_with_flag", func(t *testing.T) {
+		t.Parallel()
+
+		val := New(0)
+		require.Equal(t, 0, val.ValDefault(42))
+		val.Reset()
+		require.Equal(t, 42, val.ValDefault(42))
+	})
+
+	t.Run("empty_string_with_flag", func(t *testing.T) {
+		t.Parallel()
+
+		val := New("")
+		result := val.ValDefault("default")
+		require.Equal(t, "", result) // should return actual empty string, not default
+	})
+
+	t.Run("nil_slice_with_flag", func(t *testing.T) {
+		t.Parallel()
+
+		val := New([]string(nil))
+		result := val.ValDefault([]string{"default"})
+		require.Nil(t, result) // should return actual nil, not default
+	})
+
+	t.Run("complex_types", func(t *testing.T) {
+		t.Parallel()
+
+		type CustomStruct struct {
+			Name string
+			ID   int
+		}
+
+		val := Empty[CustomStruct]()
+		defaultVal := CustomStruct{Name: "default", ID: 999}
+		result := val.ValDefault(defaultVal)
+		require.Equal(t, defaultVal, result)
+	})
+}
+
