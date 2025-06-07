@@ -2,38 +2,21 @@ version: "3"
 
 silent: true
 
-vars:
-  TOOL_BIN_DIR: ./bin/tools
-
-  TOOL_LINT_SRC: github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
-  TOOL_LINT: ./{{ .TOOL_BIN_DIR }}/golangci-lint
-
-  TOOL_GOIMPORTS_SRC: golang.org/x/tools/cmd/goimports@v0.17.0
-  TOOL_GOIMPORTS: ./{{ .TOOL_BIN_DIR }}/goimports
-
-  TOOL_GOFUMPT_SRC: mvdan.cc/gofumpt@v0.5.0
-  TOOL_GOFUMPT: ./{{ .TOOL_BIN_DIR }}/gofumpt
-
 tasks:
   check:
     desc: Run all project checks
     cmds:
+      - task: "tools:install"
       - task: "go:tidy"
       - task: "test"
       - task: "fmt"
       - task: "lint"
 
   tools:install:
-    vars:
-      GOBIN:
-        sh: "echo `pwd`/{{ .TOOL_BIN_DIR }}"
     cmds:
       - echo '>>> Run install tools'
-      - rm -rf {{ .TOOL_BIN_DIR }}
-      - mkdir -p {{ .TOOL_BIN_DIR }}
-      - export GOBIN="{{ .GOBIN }}" && go install {{ .TOOL_LINT_SRC }}
-      - export GOBIN="{{ .GOBIN }}" && go install {{ .TOOL_GOIMPORTS_SRC }}
-      - export GOBIN="{{ .GOBIN }}" && go install {{ .TOOL_GOFUMPT_SRC }}
+      - go install github.com/kazhuravlev/toolset/cmd/toolset@latest
+      - toolset sync
 
   go:tidy:
     cmds:
@@ -46,15 +29,15 @@ tasks:
     desc: Run static analysis
     cmds:
       - echo '>>> Run golangci-lint'
-      - "{{ .TOOL_LINT }} run"
+      - toolset run golangci-lint run
 
   fmt:
     desc: Safe formatting codebase
     cmds:
       - echo ">>> Run Code Formatter"
       - go fmt ./...
-      - "{{ .TOOL_GOFUMPT }} -l -w ."
-      - "{{ .TOOL_GOIMPORTS }} -l -w ."
+      - toolset run gofumpt -l -w .
+      - toolset run goimports -l -w .
 
   test:
     cmds:
