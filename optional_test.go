@@ -162,3 +162,53 @@ func TestReset(t *testing.T) {
 	require.Equal(t, false, val.HasVal())
 	require.Equal(t, 0, val.Val())
 }
+
+func TestGet(t *testing.T) {
+	t.Parallel()
+
+	t.Run("with_value", func(t *testing.T) {
+		t.Parallel()
+
+		val := New("hello")
+		result, ok := val.Get()
+		require.True(t, ok)
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("without_value", func(t *testing.T) {
+		t.Parallel()
+
+		val := Empty[string]()
+		result, ok := val.Get()
+		require.False(t, ok)
+		require.Equal(t, "", result) // zero value
+	})
+
+	t.Run("zero_value_with_flag", func(t *testing.T) {
+		t.Parallel()
+
+		val := New(0) // zero value but has flag
+		result, ok := val.Get()
+		require.True(t, ok)
+		require.Equal(t, 0, result)
+	})
+
+	t.Run("empty_string_with_flag", func(t *testing.T) {
+		t.Parallel()
+
+		val := New("") // empty string but has flag
+		result, ok := val.Get()
+		require.True(t, ok)
+		require.Equal(t, "", result)
+	})
+
+	t.Run("nil_slice_with_flag", func(t *testing.T) {
+		t.Parallel()
+
+		val := New([]string(nil)) // nil slice but has flag
+		result, ok := val.Get()
+		require.True(t, ok)
+		require.Nil(t, result)
+	})
+}
+
