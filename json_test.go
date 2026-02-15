@@ -297,3 +297,23 @@ func TestJSONComplexTypes(t *testing.T) {
 		require.Equal(t, "value", result["custom"])
 	})
 }
+
+func TestJSONMarshalError(t *testing.T) {
+	t.Parallel()
+
+	type payload struct {
+		V Val[chan int] `json:"v"`
+	}
+
+	_, err := json.Marshal(payload{V: New(make(chan int))})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "marshal json")
+}
+
+func TestUnmarshalJSONEmptyInput(t *testing.T) {
+	t.Parallel()
+
+	var v Val[int]
+	err := v.UnmarshalJSON(nil)
+	require.EqualError(t, err, "empty json input")
+}
