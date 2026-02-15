@@ -2,11 +2,21 @@ package optional
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+var errBadValuer = errors.New("boom")
+
+type badValuer struct{}
+
+func (badValuer) Value() (driver.Value, error) {
+	return nil, errBadValuer
+}
 
 func TestScan(t *testing.T) {
 	t.Parallel()
@@ -131,6 +141,15 @@ func TestScan(t *testing.T) {
 		err := val.Scan("not-valid-data")
 		require.Error(t, err)
 	})
+
+	t.Run("sql_Scanner_bad_scenario_resets_existing_value", func(t *testing.T) {
+		val := New(sql.NullBool{Bool: true, Valid: true})
+
+		err := val.Scan("not-valid-data")
+		require.Error(t, err)
+		assert.False(t, val.hasVal)
+		assert.Equal(t, sql.NullBool{}, val.value)
+	})
 }
 
 func TestValue(t *testing.T) {
@@ -161,5 +180,15 @@ func TestValue(t *testing.T) {
 		}).Value()
 		require.NoError(t, err)
 		assert.Equal(t, true, val)
+	})
+
+	t.Run("valuer_error", func(t *testing.T) {
+		t.Parallel()
+
+		val, err := New[badValuer](badValuer{}).Value()
+		require.Error(t, err)
+		assert.Nil(t, val)
+		assert.ErrorContains(t, err, "get driver value")
+		assert.ErrorIs(t, err, errBadValuer)
 	})
 }
