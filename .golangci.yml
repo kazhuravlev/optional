@@ -1,0 +1,46 @@
+version: "2"
+
+linters:
+  default: all
+  disable:
+    # Needs a hand-written allow list; the module has one runtime dependency.
+    - depguard
+    # The zero value of Val is meaningful by design; forcing every field hurts tests too.
+    - exhaustruct
+    - exhaustruct_v5
+    # Whitespace style checkers, not followed in this code base.
+    - wsl
+    - wsl_v5
+    # `if err := f(); err != nil` is the style used throughout.
+    - noinlineerr
+    # Short names (v, ts, db) are idiomatic in a package this small.
+    - varnamelen
+    # Tests live in package optional on purpose: they assert on private fields.
+    - testpackage
+    # Deprecated in favour of gomodguard_v2; listed only to silence the warning.
+    - gomodguard
+  settings:
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+          yaml: snake
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - err113
+          - funlen
+          - gochecknoglobals
+          - goconst
+          - noctx
+          - wrapcheck
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/kazhuravlev/optional
