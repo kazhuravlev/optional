@@ -15,7 +15,7 @@ Type-safe optional values for Go - marshal/unmarshal to/from JSON, YAML, SQL and
 go get github.com/kazhuravlev/optional
 ```
 
-Requires Go 1.22 or newer.
+Requires Go 1.23 or newer.
 
 ## Quick Start
 
