@@ -1,4 +1,4 @@
-package optional //nolint:testpackage // required, because accessing to private fields
+package optional
 
 import (
 	"encoding/json"
@@ -42,7 +42,7 @@ func TestEmptyValues(t *testing.T) {
 			var obj struct {
 				V Val[[]string] `json:"v"`
 			}
-			assert.NoError(t, json.Unmarshal(row.jsonBytes, &obj))
+			require.NoError(t, json.Unmarshal(row.jsonBytes, &obj))
 			assert.Equal(t, row.exp, obj.V)
 		})
 	}
@@ -61,7 +61,7 @@ func TestNewFromPointer(t *testing.T) {
 	val = nil
 	opt = NewFromPointer(val)
 	assert.False(t, opt.HasVal())
-	assert.Equal(t, "", opt.Val())
+	assert.Empty(t, opt.Val())
 }
 
 func TestNotEmptyValues(t *testing.T) {
@@ -95,7 +95,7 @@ func TestNotEmptyValues(t *testing.T) {
 			var obj struct {
 				V Val[[]string] `json:"v"`
 			}
-			assert.NoError(t, json.Unmarshal(row.jsonBytes, &obj))
+			require.NoError(t, json.Unmarshal(row.jsonBytes, &obj))
 			assert.Equal(t, row.exp, obj.V)
 		})
 	}
@@ -132,14 +132,14 @@ func TestSet(t *testing.T) {
 		t.Helper()
 
 		t.Run("", func(t *testing.T) {
-			require.Equal(t, false, val.HasVal())
+			require.False(t, val.HasVal())
 
 			val.Set(42)
-			require.Equal(t, true, val.HasVal())
+			require.True(t, val.HasVal())
 			require.Equal(t, 42, val.Val())
 
 			val.Set(-42)
-			require.Equal(t, true, val.HasVal())
+			require.True(t, val.HasVal())
 			require.Equal(t, -42, val.Val())
 		})
 	}
@@ -155,11 +155,11 @@ func TestReset(t *testing.T) {
 
 	val := New(42)
 
-	require.Equal(t, true, val.HasVal())
+	require.True(t, val.HasVal())
 	require.Equal(t, 42, val.Val())
 
 	val.Reset()
-	require.Equal(t, false, val.HasVal())
+	require.False(t, val.HasVal())
 	require.Equal(t, 0, val.Val())
 }
 
@@ -181,7 +181,7 @@ func TestGet(t *testing.T) {
 		val := Empty[string]()
 		result, ok := val.Get()
 		require.False(t, ok)
-		require.Equal(t, "", result) // zero value
+		require.Empty(t, result) // zero value
 	})
 
 	t.Run("zero_value_with_flag", func(t *testing.T) {
@@ -199,7 +199,7 @@ func TestGet(t *testing.T) {
 		val := New("") // empty string but has flag
 		result, ok := val.Get()
 		require.True(t, ok)
-		require.Equal(t, "", result)
+		require.Empty(t, result)
 	})
 
 	t.Run("nil_slice_with_flag", func(t *testing.T) {
@@ -238,7 +238,7 @@ func TestValDefault(t *testing.T) {
 
 		val := New("")
 		result := val.ValDefault("default")
-		require.Equal(t, "", result) // should return actual empty string, not default
+		require.Empty(t, result) // should return actual empty string, not default
 	})
 
 	t.Run("nil_slice_with_flag", func(t *testing.T) {
@@ -299,7 +299,7 @@ func TestAsPointer(t *testing.T) {
 		val := New("")
 		ptr := val.AsPointer()
 		require.NotNil(t, ptr)
-		require.Equal(t, "", *ptr)
+		require.Empty(t, *ptr)
 	})
 
 	t.Run("nil_slice_with_flag", func(t *testing.T) {
@@ -327,4 +327,51 @@ func TestAsPointer(t *testing.T) {
 		// The pointer itself reflects the modification
 		require.Equal(t, "modified", *ptr)
 	})
+}
+
+func TestIsZero(t *testing.T) {
+	t.Parallel()
+
+	var zero Val[int]
+	assert.True(t, zero.IsZero())
+	assert.True(t, Empty[int]().IsZero())
+	assert.True(t, Empty[[]string]().IsZero())
+
+	assert.False(t, New(0).IsZero(), "a present zero value is not zero")
+	assert.False(t, New("").IsZero())
+	assert.False(t, New([]string(nil)).IsZero())
+	assert.False(t, New[*int](nil).IsZero())
+
+	v := New(1)
+	v.Reset()
+	assert.True(t, v.IsZero())
+
+	v.Set(0)
+	assert.False(t, v.IsZero())
+}
+
+func TestZeroValueIsEmpty(t *testing.T) {
+	t.Parallel()
+
+	var v Val[[]string]
+	assert.Equal(t, Empty[[]string](), v)
+	assert.False(t, v.HasVal())
+	assert.Nil(t, v.AsPointer())
+	assert.Equal(t, []string{"d"}, v.ValDefault([]string{"d"}))
+
+	got, ok := v.Get()
+	assert.False(t, ok)
+	assert.Nil(t, got)
+}
+
+func TestSetReplacesWholeValue(t *testing.T) {
+	t.Parallel()
+
+	v := New(map[string]int{"a": 1})
+	v.Set(map[string]int{"b": 2})
+	assert.Equal(t, New(map[string]int{"b": 2}), v)
+
+	v.Reset()
+	assert.Equal(t, Empty[map[string]int](), v)
+	assert.Nil(t, v.Val())
 }
